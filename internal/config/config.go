@@ -27,6 +27,13 @@ type Config struct {
 		SSLMode  string `mapstructure:"ssl_mode"`
 	}
 
+	Worker struct {
+		PollInterval    time.Duration `mapstructure:"poll_interval"`
+		Workers         int           `mapstructure:"workers"`
+		QueueSize       int           `mapstructure:"queue_size"`
+		ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"`
+	}
+
 	MaxAttempts int `mapstructure:"max_attempts"`
 }
 
@@ -58,6 +65,18 @@ func NewConfig() (*Config, error) {
 
 	viper.BindEnv("max_attempts", "MAX_ATTEMPTS")
 	viper.SetDefault("max_attempts", 5)
+
+	viper.BindEnv("worker.poll_interval", "WORKER_POLL_INTERVAL")
+	viper.SetDefault("worker.poll_interval", "5s")
+
+	viper.BindEnv("worker.workers", "WORKER_COUNT")
+	viper.SetDefault("worker.workers", 4)
+
+	viper.BindEnv("worker.queue_size", "WORKER_QUEUE_SIZE")
+	viper.SetDefault("worker.queue_size", 8)
+
+	viper.BindEnv("worker.shutdown_timeout", "WORKER_SHUTDOWN_TIMEOUT")
+	viper.SetDefault("worker.shutdown_timeout", "10s")
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {

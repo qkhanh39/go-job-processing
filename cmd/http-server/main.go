@@ -26,7 +26,7 @@ import (
 type App struct {
 	router httpHandler.Router
 	DB     *pgxpool.Pool
-	worker *worker.Worker
+	worker *worker.Pool
 }
 
 func NewApp(cfg *config.Config) (*App, error) {
@@ -62,7 +62,10 @@ func NewApp(cfg *config.Config) (*App, error) {
 	jobWorker := worker.New(
 		jobService,
 		notifier.Channel(),
-		5*time.Second,
+		cfg.Worker.PollInterval,
+		cfg.Worker.Workers,
+		cfg.Worker.QueueSize,
+		cfg.Worker.ShutdownTimeout,
 	)
 
 	return &App{
